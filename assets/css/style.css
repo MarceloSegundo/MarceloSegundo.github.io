@@ -130,7 +130,8 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 3rem 0; }
 .figure { margin: 2rem 0; }
 .figure img, .figure svg { display: block; max-width: 100%; height: auto; }
 .figure figcaption { font-size: 0.875rem; color: var(--muted); margin-top: 0.5rem; }
-.figure.diagram svg, .figure.diagram img { color: var(--fg); width: 100%; }
+.figure.diagram { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.figure.diagram svg { color: var(--fg); width: 100%; min-width: 34rem; }
 
 .screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
 .screens .figure { margin: 0; }

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ibmoria: PWA de comunicação da Igreja Batista Moriá · Marcelo Segundo</title>
+  <meta name="description" content="Estudo de caso: PWA que substituiu grupos de WhatsApp na comunicação de uma igreja. Backend em Go, login por OTP, Web Push, bucket privado e auditoria de segurança.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://marcelosegundo.github.io/projetos/ibmoria/">
+  <meta property="og:title" content="ibmoria: PWA de comunicação da Igreja Batista Moriá">
+  <meta property="og:description" content="Go, React, OTP por SMS/WhatsApp, Web Push e uma auditoria de segurança com 5 achados corrigidos.">
+  <meta property="og:image" content="https://marcelosegundo.github.io/assets/img/og/ibmoria.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="/assets/fonts/source-serif-4-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="/">Marcelo Segundo</a>
+      <nav aria-label="Principal">
+        <a href="/#projetos">Projetos</a>
+        <a href="/#experiencia">Sobre</a>
+        <a href="/#contato">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <article>
+      <p class="eyebrow">Estudo de caso · 02</p>
+      <h1>ibmoria: o app de comunicação da Igreja Batista Moriá</h1>
+      <p class="lede">Um PWA que tira os avisos da igreja de vários grupos de WhatsApp e os entrega por canais, com notificação push e login só com o número do celular.</p>
+
+      <dl class="case-meta">
+        <dt>Papel</dt><dd>Projeto solo: backend, frontend, infra e deploy</dd>
+        <dt>Período</dt><dd>ago/2026 – em andamento · 350 commits</dd>
+        <dt>Stack</dt><dd>Go (chi, pgx), PostgreSQL, S3, React + TypeScript, Tailwind, TanStack Query, Web Push (VAPID)</dd>
+        <dt>Infra</dt><dd>Frontend na Vercel, backend e banco no Railway</dd>
+        <dt>No ar</dt><dd><a href="https://ibmoria-app.vercel.app/">ibmoria-app.vercel.app</a> (entrada pelo número de celular)</dd>
+      </dl>
+
+      <h2>Contexto e problema</h2>
+      <p>Os avisos da igreja circulavam por vários grupos de WhatsApp. Ninguém sabia quem tinha recebido o quê, não dava para falar só com um ministério e o ruído afogava o que importava.</p>
+      <p>Um app nativo esbarrava em duas restrições: não havia conta de desenvolvedor Apple e o custo de publicar nas lojas era algo a evitar. O objetivo virou uma ferramenta própria, instalável pelo navegador, com push, publicação segmentada por ministério e canais de conversa configuráveis.</p>
+
+      <div class="screens">
+        <figure class="figure">
+          <img src="/assets/img/ibmoria/mural.webp" alt="Tela Mural: saudação ao membro, filtros Todos e Não lidos e a lista de conversas dos canais com contador de mensagens não lidas" width="780" height="1688">
+          <figcaption>Mural com as conversas do membro.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="/assets/img/ibmoria/canal.webp" alt="Canal Avisos gerais com dois eventos (Culto de Santa Ceia e mutirão de limpeza) mostrando data, hora e local, e avisos de texto" width="780" height="1688" loading="lazy">
+          <figcaption>Canal de avisos com eventos datados.</figcaption>
+        </figure>
+      </div>
+
+      <h2>Arquitetura</h2>
+      <figure class="figure diagram">
+        <svg viewBox="0 0 680 380" role="img" aria-labelledby="arq-ibmoria-t arq-ibmoria-d" font-family="system-ui, sans-serif" font-size="13">
+          <title id="arq-ibmoria-t">Arquitetura do ibmoria</title>
+          <desc id="arq-ibmoria-d">O PWA em React chama a API em Go. A API grava no PostgreSQL, guarda e serve arquivos de um bucket S3 privado, envia o código de login por SMS ou WhatsApp e dispara notificações pelo serviço de push do navegador, que as entrega ao PWA.</desc>
+          <defs>
+            <marker id="seta-ib" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="10" y="150" width="150" height="80" rx="6"/>
+            <rect x="250" y="130" width="170" height="120" rx="6"/>
+            <rect x="510" y="10" width="160" height="60" rx="6"/>
+            <rect x="510" y="110" width="160" height="60" rx="6"/>
+            <rect x="510" y="210" width="160" height="60" rx="6"/>
+            <rect x="510" y="310" width="160" height="60" rx="6"/>
+          </g>
+          <g stroke="currentColor" stroke-width="1.2" fill="none" marker-end="url(#seta-ib)">
+            <path d="M160 190 H248"/>
+            <path d="M420 160 L508 45"/>
+            <path d="M420 175 L508 140"/>
+            <path d="M420 205 L508 240"/>
+            <path d="M420 225 L508 335"/>
+            <path d="M510 345 C 300 380, 120 330, 85 232"/>
+          </g>
+          <g fill="currentColor" text-anchor="middle">
+            <text x="85" y="182" font-weight="600">PWA</text>
+            <text x="85" y="200">React + TypeScript</text>
+            <text x="85" y="218" style="fill: var(--muted)">Vercel</text>
+            <text x="335" y="170" font-weight="600">API REST em Go</text>
+            <text x="335" y="188">chi · um pacote</text>
+            <text x="335" y="204">por domínio</text>
+            <text x="335" y="232" style="fill: var(--muted)">Railway</text>
+            <text x="590" y="36" font-weight="600">PostgreSQL</text>
+            <text x="590" y="54">pgx · limites de OTP</text>
+            <text x="590" y="136" font-weight="600">Bucket S3 privado</text>
+            <text x="590" y="154">servido via proxy</text>
+            <text x="590" y="236" font-weight="600">SMS ou WhatsApp</text>
+            <text x="590" y="254">código de login (OTP)</text>
+            <text x="590" y="336" font-weight="600">Push do navegador</text>
+            <text x="590" y="354">Web Push · VAPID</text>
+            <text x="300" y="368" style="fill: var(--muted)">notificação chega ao PWA instalado</text>
+          </g>
+        </svg>
+        <figcaption>O frontend só conversa com a API; banco, arquivos, envio de código e push ficam atrás dela.</figcaption>
+      </figure>
+      <p>O membro abre o PWA, informa o celular e recebe um código. A API valida o código, emite um JWT e, a partir daí, cada requisição recarrega o membro do banco para saber o papel atual. Quando um líder publica num canal restrito, a API grava a mensagem e dispara Web Push para os dispositivos inscritos. Fotos e anexos sobem para o bucket e voltam pela própria API.</p>
+      <p>O backend tem um pacote por domínio (<code>auth</code>, <code>membros</code>, <code>canais</code>, <code>mensagens</code>, <code>upload</code>, <code>push</code>…), cada um com handlers HTTP e uma interface de store, com implementação em Postgres e fakes nos testes. O repositório tem 38 arquivos de teste em Go e 57 no frontend.</p>
+
+      <h2>Decisões e trade-offs</h2>
+
+      <section class="decision">
+        <h3>PWA em vez de app nativo</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Instalar pelo navegador ("Adicionar à tela inicial"), com manifest e service worker, sem passar por loja.</dd>
+          <dt>Por quê</dt><dd>Não havia conta de desenvolvedor Apple e a igreja queria evitar o custo de publicação nas lojas.</dd>
+          <dt>Custo</dt><dd>Push depende do service worker, que só roda no build de produção, e no iPhone exige o app instalado na tela inicial. A instalação precisa ser explicada aos membros.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Login por código no celular, com canal de envio plugável</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Sem senha: o membro entra com o celular e um código de 6 dígitos. O envio é uma interface com três implementações mutuamente exclusivas: SMS (Mobizon), WhatsApp e um modo de desenvolvimento que escreve o código no log.</dd>
+          <dt>Por quê</dt><dd>O público não quer gerenciar senha. Trocar de provedor de envio não mexe na geração nem na validação do código. Configuração inválida, como dois canais ligados ou o modo de log fora de localhost, derruba o processo na subida em vez de falhar em silêncio.</dd>
+          <dt>Custo</dt><dd>Cada SMS custa dinheiro (cerca de R$ 0,06), o que abre espaço para abuso de custo. Isso levou à decisão seguinte.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Limites de OTP garantidos no Postgres, não em memória</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Depois do deploy com SMS ligado, uma revisão achou três falhas: IP do cliente falsificável por cabeçalho, corrida no limite de tentativas e corrida no cooldown de 60 s. A correção passou a ler o IP só de <code>X-Real-IP</code> (que o edge do Railway sobrescreve), criou um teto global de 30 SMS por hora e 50 por dia e moveu cooldown, tentativas e teto para operações atômicas no Postgres.</dd>
+          <dt>Por quê</dt><dd>Um contador em memória zera a cada restart ou deploy (quem derruba o container ganha envios novos) e deixa de valer com mais de uma réplica.</dd>
+          <dt>Custo</dt><dd>Os pedidos de código passam a ser serializados no banco, irrelevante no volume de uma igreja. Mudar o teto exige deploy.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Bucket privado servido por proxy da API</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Em produção, o storage do Railway é sempre privado. A API passou a buscar o arquivo no bucket e repassá-lo (<code>GET /uploads/{key}</code>). Documentos saem com <code>Content-Disposition</code>: PDF abre no navegador, o resto baixa com o nome original.</dd>
+          <dt>Por quê</dt><dd>O navegador não consegue assinar requisições ao bucket. A rota fica pública porque a chave do arquivo é aleatória e não existe listagem; exigir login quebraria o <code>&lt;img src&gt;</code>. A troca não exigiu mudança no frontend nem no schema, só no valor de uma variável de ambiente.</dd>
+          <dt>Custo</dt><dd>Todo o tráfego de imagens e anexos passa pelo backend.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Auditoria de segurança antes de crescer</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Revisão focada em segurança sobre o diff de uma feature grande, com relatório e um spec de correção. Ela encontrou 5 achados (1 alto, 3 médios, 1 baixo), todos corrigidos, cada um com teste de regressão.</dd>
+          <dt>O que apareceu</dt><dd>
+            <ul>
+              <li><strong>Alto:</strong> um endpoint de "marcar como lido" deixava qualquer membro entrar em canal privado.</li>
+              <li><strong>Médio:</strong> SSRF pelo endpoint de inscrição de push. Corrigido com um cliente HTTP que recusa IP privado, loopback e metadata e bloqueia redirects.</li>
+              <li><strong>Médio:</strong> JWT de 90 dias com o papel embutido. Agora o papel vem do banco a cada requisição.</li>
+              <li><strong>Médio:</strong> o envio padrão de código era "fail-open" e escrevia o OTP no log. Agora a subida falha sem um canal real configurado.</li>
+              <li><strong>Baixo:</strong> URLs de foto aceitas sem validação.</li>
+            </ul>
+          </dd>
+          <dt>Custo</dt><dd>Uma consulta extra ao banco por requisição autenticada, em troca de rebaixar ou remover um membro valer na hora.</dd>
+        </dl>
+      </section>
+
+      <h2>Telas</h2>
+      <p class="muted">Capturas do app rodando localmente com dados fictícios: nenhum membro real aparece.</p>
+      <div class="screens">
+        <figure class="figure">
+          <img src="/assets/img/ibmoria/login.webp" alt="Tela de login pedindo o número de celular" width="780" height="1688" loading="lazy">
+          <figcaption>Login só com o celular.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="/assets/img/ibmoria/canais.webp" alt="Lista de canais da igreja com o canal obrigatório de avisos e canais que o membro segue" width="780" height="1688" loading="lazy">
+          <figcaption>Canais: obrigatórios, abertos e com entrada controlada.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="/assets/img/ibmoria/perfil.webp" alt="Perfil do membro com notificações, privacidade e dados da ficha" width="780" height="1688" loading="lazy">
+          <figcaption>Perfil e ficha do membro.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="/assets/img/ibmoria/admin-membros.webp" alt="Administração de membros com busca, papel de cada pessoa e indicação de cadastro incompleto" width="780" height="1688" loading="lazy">
+          <figcaption>Administração de membros e papéis.</figcaption>
+        </figure>
+      </div>
+
+      <div class="closing">
+        <p><strong>O código é privado.</strong> Faço demonstração em entrevista: arquitetura, testes e o histórico de specs e planos de cada feature.</p>
+        <p><a href="mailto:marcelosegundo999@gmail.com">marcelosegundo999@gmail.com</a> · <a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <ul>
+        <li><a href="mailto:marcelosegundo999@gmail.com">E-mail</a></li>
+        <li><a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></li>
+        <li><a href="https://github.com/MarceloSegundo">GitHub</a></li>
+        <li><a href="/curriculo/marcelo-segundo.pdf">Currículo</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
