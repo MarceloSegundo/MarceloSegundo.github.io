@@ -8,7 +8,7 @@
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://marcelosegundo.github.io/projetos/assistente-vendas-ia/">
   <meta property="og:title" content="Assistente de vendas com IA para corretora de planos de saúde">
-  <meta property="og:description" content="Tool calling contra alucinação de preço, funil de estágios e migração Spring Boot → Quarkus nativo.">
+  <meta property="og:description" content="Tool calling contra preço inventado, funil de estágios e migração Spring Boot → Quarkus nativo para cortar custo de memória.">
   <meta property="og:image" content="https://marcelosegundo.github.io/assets/img/og/assistente-vendas-ia.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preload" href="/assets/fonts/source-serif-4-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -140,6 +140,7 @@
         <h3>Migração de Spring Boot para Quarkus com imagem nativa</h3>
         <dl>
           <dt>Decisão</dt><dd>A primeira versão foi em Spring Boot 3 com Spring AI e Spring Security com JWT próprio. Ela foi portada para Quarkus com LangChain4j, Hibernate Panache e SmallRye JWT com chaves RSA, e hoje roda como imagem nativa compilada com Mandrel.</dd>
+          <dt>Por quê</dt><dd>Custo de hospedagem. Mesmo sem nenhum usuário, a aplicação Spring mantinha um consumo de memória alto, e no Railway memória é o que define a conta. Quarkus com imagem nativa ataca exatamente isso: o binário compilado antecipadamente sobe mais rápido e ocupa menos memória ociosa do que a JVM com o contexto do Spring.</dd>
           <dt>Como</dt><dd>Os dois módulos ficaram lado a lado no repositório com a mesma estrutura de pacotes (<code>chat</code>, <code>plan</code>, <code>lead</code>, <code>config</code>, <code>security</code>), o que permitiu comparar o comportamento camada por camada durante a migração.</dd>
           <dt>Custo</dt><dd>O build nativo cobrou caro, e cada problema ficou documentado:
             <ul>
