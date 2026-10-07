@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Marcelo Segundo · Desenvolvedor Java Backend</title>
-  <meta name="description" content="Desenvolvedor Java Backend com mais de 5 anos em sistemas onde erro custa dinheiro: pagamentos, conciliação e fiscal. Estudos de caso de projetos com IA, Quarkus, Spring Boot e Go.">
+  <meta name="description" content="Desenvolvedor Java Backend com mais de 5 anos de experiência, do modelo de dados ao deploy. Estudos de caso com IA, Quarkus, Spring Boot e Go, com arquitetura e trade-offs.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://marcelosegundo.github.io/">
   <meta property="og:title" content="Marcelo Segundo · Desenvolvedor Java Backend">
-  <meta property="og:description" content="Pagamentos, fiscal e IA aplicada. Estudos de caso com arquitetura e trade-offs.">
+  <meta property="og:description" content="Do modelo de dados ao deploy. Estudos de caso com arquitetura e trade-offs.">
   <meta property="og:image" content="https://marcelosegundo.github.io/assets/img/og/home.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preload" href="/assets/fonts/source-serif-4-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body>
+<body class="has-band">
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
   <header class="site-header">
     <div class="container">
@@ -27,20 +27,31 @@
     </div>
   </header>
 
-  <main id="conteudo" class="container">
-    <section class="hero">
-      <p class="eyebrow">Marcelo Segundo</p>
-      <h1>Desenvolvedor Java Backend. <span class="muted">Pagamentos, fiscal e IA aplicada.</span></h1>
-      <p class="lede">Há mais de 5 anos construo, na Edu3, um ERP escolar SaaS usado por mais de 50 escolas e 4 prefeituras, com unidades de mais de 4 mil alunos. Meu foco é a parte do sistema onde erro custa dinheiro: cobrança, conciliação e fiscal.</p>
-      <ul class="links">
-        <li><a href="/curriculo/marcelo-segundo.pdf">Currículo (PDF)</a></li>
-        <li><a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></li>
-        <li><a href="https://github.com/MarceloSegundo">GitHub</a></li>
-        <li><a href="mailto:marcelosegundo999@gmail.com">marcelosegundo999@gmail.com</a></li>
-      </ul>
+  <main id="conteudo">
+    <section class="band" aria-labelledby="apresentacao">
+      <div class="container">
+        <p class="eyebrow rise">Aberto a vagas remotas ou híbridas</p>
+        <h1 id="apresentacao" class="rise">Desenvolvedor Java Backend. <span class="accent">Do modelo de dados ao deploy.</span></h1>
+        <p class="lede rise">Há mais de 5 anos construo, na Edu3, um ERP SaaS usado por mais de 50 escolas e 4 prefeituras: integrações bancárias e fiscais, arquitetura de módulos novos, revisão de código e testes. Fora dela, levei do zero à produção um assistente de vendas com IA em Quarkus e um PWA em Go.</p>
+        <ul class="links rise">
+          <li><a href="/curriculo/marcelo-segundo.pdf">Currículo (PDF)</a></li>
+          <li><a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></li>
+          <li><a href="https://github.com/MarceloSegundo">GitHub</a></li>
+          <li><a href="mailto:marcelosegundo999@gmail.com">marcelosegundo999@gmail.com</a></li>
+        </ul>
+        <div class="log" aria-hidden="true">
+          <div><span class="prompt">$</span> git log --oneline</div>
+          <div><span class="hash">a3f9c21</span> migra backend de Spring Boot para Quarkus nativo</div>
+          <div><span class="hash">7e1d4b8</span> consulta preços via tool calling, sem o modelo inventar valor</div>
+          <div><span class="hash">c52a0f3</span> corrige os 5 achados da auditoria de segurança</div>
+          <div><span class="hash">91b7e6d</span> adapta a emissão fiscal à Reforma Tributária (IBS/CBS)</div>
+          <div><span class="prompt">$</span> <span class="cursor"></span></div>
+        </div>
+      </div>
     </section>
 
-    <section id="projetos" aria-labelledby="projetos-titulo">
+    <div class="container">
+    <section class="reveal" id="projetos" aria-labelledby="projetos-titulo">
       <h2 id="projetos-titulo">Projetos</h2>
       <p class="muted">Três projetos feitos sozinho, de ponta a ponta. Os dois primeiros têm código privado e aparecem como estudos de caso, com arquitetura e trade-offs.</p>
 
@@ -66,7 +77,7 @@
       </article>
     </section>
 
-    <section id="experiencia" aria-labelledby="experiencia-titulo">
+    <section class="reveal" id="experiencia" aria-labelledby="experiencia-titulo">
       <h2 id="experiencia-titulo">Experiência</h2>
       <h3>Edu3 · ERP escolar SaaS</h3>
       <p class="muted">Estágio (nov/2020) → Júnior (jan/2022) → Pleno (jul/2025 – atual)</p>
@@ -79,7 +90,7 @@
       <p class="stack muted">Java · Hibernate/JPA · MariaDB · Docker · Kubernetes · GitLab CI · Drone</p>
     </section>
 
-    <section id="contato" aria-labelledby="contato-titulo">
+    <section class="reveal" id="contato" aria-labelledby="contato-titulo">
       <h2 id="contato-titulo">Contato</h2>
       <p>Procuro vagas de desenvolvedor Java/Backend, pleno ou sênior, remotas ou híbridas. O jeito mais rápido de falar comigo é por e-mail ou LinkedIn.</p>
       <ul class="links">
@@ -89,6 +100,7 @@
         <li><a href="/curriculo/marcelo-segundo.pdf">Currículo (PDF)</a></li>
       </ul>
     </section>
+    </div>
   </main>
 
   <footer class="site-footer">

@@ -14,7 +14,7 @@
   <link rel="preload" href="/assets/fonts/source-serif-4-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body>
+<body class="has-band">
   <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
   <header class="site-header">
     <div class="container">
@@ -27,11 +27,17 @@
     </div>
   </header>
 
-  <main id="conteudo" class="container">
+  <main id="conteudo">
     <article>
-      <p class="eyebrow">Estudo de caso · 01</p>
-      <h1>Assistente de vendas com IA para uma corretora de planos de saúde</h1>
-      <p class="lede">Um chat no estilo WhatsApp em que a IA conduz a venda: qualifica o cliente, monta a composição familiar e apresenta a cotação, com preço e cobertura vindos do banco de dados, nunca inventados pelo modelo.</p>
+      <div class="band band--page">
+        <div class="container">
+          <p class="eyebrow rise">Estudo de caso · 01</p>
+          <h1 class="rise">Assistente de vendas com IA para uma corretora de planos de saúde</h1>
+          <p class="lede rise">Um chat no estilo WhatsApp em que a IA conduz a venda: qualifica o cliente, monta a composição familiar e apresenta a cotação, com preço e cobertura vindos do banco de dados, nunca inventados pelo modelo.</p>
+        </div>
+      </div>
+
+      <div class="container">
 
       <dl class="case-meta">
         <dt>Papel</dt><dd>Projeto solo: backend, frontend, infra e deploy</dd>
@@ -55,7 +61,7 @@
       </figure>
 
       <h2>Arquitetura</h2>
-      <figure class="figure diagram">
+      <figure class="figure diagram reveal">
         <svg viewBox="0 0 700 330" role="img" aria-labelledby="arq-av-t arq-av-d" font-family="system-ui, sans-serif" font-size="13">
           <title id="arq-av-t">Arquitetura do assistente de vendas</title>
           <desc id="arq-av-d">O chat em React envia a mensagem para a API em Quarkus. A API lê o estágio do funil no PostgreSQL e chama o modelo de linguagem via OpenRouter oferecendo só as ferramentas daquele estágio. Quando o modelo pede uma ferramenta, a API executa a consulta no PostgreSQL e devolve o resultado ao modelo, que compõe a resposta. No fim do funil o cliente é encaminhado ao corretor pelo WhatsApp.</desc>
@@ -109,7 +115,7 @@
 
       <h2>Decisões e trade-offs</h2>
 
-      <section class="decision">
+      <section class="decision reveal">
         <h3>Preço e cobertura só via tool calling</h3>
         <dl>
           <dt>Decisão</dt><dd>O prompt proíbe o modelo de calcular preço; o valor exibido é sempre o retorno de uma ferramenta que consulta a tabela de preços por plano, acomodação e faixa etária. O card de cotação é montado pelo backend a partir desses dados.</dd>
@@ -118,7 +124,7 @@
         </dl>
       </section>
 
-      <section class="decision">
+      <section class="decision reveal">
         <h3>Funil de estágios no banco, com ferramentas liberadas por estágio</h3>
         <dl>
           <dt>Decisão</dt><dd>Cada conversa tem um estágio persistido (nome → nascimento → CPF/CNPJ → telefone → composição familiar → cotação → encaminhamento). O bot não escolhe o próprio objetivo: o backend lê o estágio, injeta a instrução do turno e expõe só as ferramentas daquele passo. Cada ferramenta de salvamento já avança o estágio antes de retornar.</dd>
@@ -127,7 +133,7 @@
         </dl>
       </section>
 
-      <section class="decision">
+      <section class="decision reveal">
         <h3>Rede de segurança para quando o modelo "esquece" a ferramenta</h3>
         <dl>
           <dt>Decisão</dt><dd>Depois de cada resposta, uma heurística verifica se a mensagem do usuário parecia conter o dado esperado (uma data, um nome, um CPF) e se o estágio de fato avançou. Se não avançou, a API dispara um turno de correção. Se mesmo assim o card de cotação ou de encaminhamento não vier, o backend o gera a partir do banco.</dd>
@@ -136,7 +142,7 @@
         </dl>
       </section>
 
-      <section class="decision">
+      <section class="decision reveal">
         <h3>Migração de Spring Boot para Quarkus com imagem nativa</h3>
         <dl>
           <dt>Decisão</dt><dd>A primeira versão foi em Spring Boot 3 com Spring AI e Spring Security com JWT próprio. Ela foi portada para Quarkus com LangChain4j, Hibernate Panache e SmallRye JWT com chaves RSA, e hoje roda como imagem nativa compilada com Mandrel.</dd>
@@ -152,7 +158,7 @@
         </dl>
       </section>
 
-      <section class="decision">
+      <section class="decision reveal">
         <h3>Deploy dividido e modelo com fallback</h3>
         <dl>
           <dt>Decisão</dt><dd>Frontend estático na Vercel, API e banco no Railway, migrações com Flyway. O GitHub Actions roda os testes do backend e o lint e o build do frontend nos pushes para a branch de desenvolvimento e nos pull requests para a principal. O acesso ao LLM passa pelo OpenRouter, com um modelo principal e troca automática para um modelo de fallback se a API falhar.</dd>
@@ -177,6 +183,7 @@
       <div class="closing">
         <p><strong>O código é privado e o cliente não é identificado.</strong> Faço demonstração em entrevista, incluindo a comparação entre as versões Spring Boot e Quarkus.</p>
         <p><a href="mailto:marcelosegundo999@gmail.com">marcelosegundo999@gmail.com</a> · <a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></p>
+      </div>
       </div>
     </article>
   </main>
