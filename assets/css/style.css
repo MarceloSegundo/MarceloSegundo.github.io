@@ -133,6 +133,9 @@ hr { border: none; border-top: 1px solid var(--rule); margin: 3rem 0; }
 .figure.diagram { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .figure.diagram svg { color: var(--fg); width: 100%; min-width: 34rem; }
 
+.figure.phone img { max-width: 22rem; width: 100%; margin: 0 auto; border: 1px solid var(--rule); border-radius: 10px; }
+.figure.phone figcaption { text-align: center; }
+
 .screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
 .screens .figure { margin: 0; }
 .screens img { border: 1px solid var(--rule); border-radius: 6px; }

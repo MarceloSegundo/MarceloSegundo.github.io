@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assistente de vendas com IA para corretora de planos de saúde · Marcelo Segundo</title>
+  <meta name="description" content="Estudo de caso: chat de vendas com IA que cota planos de saúde com preços vindos do banco via tool calling. Migração de Spring Boot + Spring AI para Quarkus + LangChain4j com imagem nativa.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://marcelosegundo.github.io/projetos/assistente-vendas-ia/">
+  <meta property="og:title" content="Assistente de vendas com IA para corretora de planos de saúde">
+  <meta property="og:description" content="Tool calling contra alucinação de preço, funil de estágios e migração Spring Boot → Quarkus nativo.">
+  <meta property="og:image" content="https://marcelosegundo.github.io/assets/img/og/assistente-vendas-ia.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="/assets/fonts/source-serif-4-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+  <header class="site-header">
+    <div class="container">
+      <a class="brand" href="/">Marcelo Segundo</a>
+      <nav aria-label="Principal">
+        <a href="/#projetos">Projetos</a>
+        <a href="/#experiencia">Sobre</a>
+        <a href="/#contato">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="conteudo" class="container">
+    <article>
+      <p class="eyebrow">Estudo de caso · 01</p>
+      <h1>Assistente de vendas com IA para uma corretora de planos de saúde</h1>
+      <p class="lede">Um chat no estilo WhatsApp em que a IA conduz a venda: qualifica o cliente, monta a composição familiar e apresenta a cotação, com preço e cobertura vindos do banco de dados, nunca inventados pelo modelo.</p>
+
+      <dl class="case-meta">
+        <dt>Papel</dt><dd>Projeto solo: backend, frontend, infra e deploy</dd>
+        <dt>Período</dt><dd>2026 · cerca de 2 meses de desenvolvimento · 153 commits</dd>
+        <dt>Stack</dt><dd>Java 21, Quarkus, LangChain4j, PostgreSQL (Flyway), imagem nativa GraalVM/Mandrel, React 19 + Vite + TypeScript, JWT RSA</dd>
+        <dt>Versão anterior</dt><dd>Spring Boot 3 + Spring AI + Spring Security</dd>
+        <dt>Infra</dt><dd>Frontend na Vercel, API e banco no Railway, CI no GitHub Actions</dd>
+        <dt>Status</dt><dd>Em produção. Link sob pedido (projeto para cliente, apresentado de forma anônima).</dd>
+      </dl>
+
+      <h2>Contexto e problema</h2>
+      <p>A corretora queria um consultor virtual na landing page: alguém que conversasse com o cliente, coletasse os dados necessários (nome, data de nascimento, CPF ou CNPJ, telefone e quem entra no plano), recomendasse o plano adequado à idade e à região e entregasse ao corretor humano, pelo WhatsApp, um lead já qualificado e com a cotação pronta.</p>
+      <p>O risco óbvio de pôr um LLM para vender plano de saúde é ele inventar preço, carência ou cobertura. O projeto inteiro gira em torno de impedir isso sem perder o tom de conversa.</p>
+
+      <figure class="figure phone">
+        <picture>
+          <source srcset="/assets/img/assistente-vendas-ia/chat-preco.webp" media="(prefers-reduced-motion: reduce)">
+          <img src="/assets/img/assistente-vendas-ia/chat-conversa.webp" alt="Animação de uma conversa completa: o cliente pede uma cotação, informa nome, data de nascimento, CPF (mascarado) e telefone, diz que não tem dependentes, recebe o card do Plano Essencial com o preço e é encaminhado para um corretor no WhatsApp" width="560" height="905">
+        </picture>
+        <figcaption>Uma conversa completa, do primeiro "oi" ao encaminhamento para o corretor. Demo local com marca, preços e dados fictícios.</figcaption>
+      </figure>
+
+      <h2>Arquitetura</h2>
+      <figure class="figure diagram">
+        <svg viewBox="0 0 700 330" role="img" aria-labelledby="arq-av-t arq-av-d" font-family="system-ui, sans-serif" font-size="13">
+          <title id="arq-av-t">Arquitetura do assistente de vendas</title>
+          <desc id="arq-av-d">O chat em React envia a mensagem para a API em Quarkus. A API lê o estágio do funil no PostgreSQL e chama o modelo de linguagem via OpenRouter oferecendo só as ferramentas daquele estágio. Quando o modelo pede uma ferramenta, a API executa a consulta no PostgreSQL e devolve o resultado ao modelo, que compõe a resposta. No fim do funil o cliente é encaminhado ao corretor pelo WhatsApp.</desc>
+          <defs>
+            <marker id="seta-av" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+          <g fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="10" y="120" width="140" height="80" rx="6"/>
+            <rect x="230" y="90" width="210" height="140" rx="6"/>
+            <rect x="250" y="160" width="170" height="52" rx="4" stroke-dasharray="4 3"/>
+            <rect x="530" y="20" width="160" height="70" rx="6"/>
+            <rect x="530" y="230" width="160" height="70" rx="6"/>
+            <rect x="10" y="260" width="140" height="56" rx="6"/>
+          </g>
+          <g stroke="currentColor" stroke-width="1.2" fill="none" marker-end="url(#seta-av)">
+            <path d="M150 160 H228"/>
+            <path d="M440 110 L528 62"/>
+            <path d="M530 78 L442 128"/>
+            <path d="M440 200 L528 258"/>
+            <path d="M230 210 L152 280"/>
+          </g>
+          <g fill="currentColor" text-anchor="middle">
+            <text x="80" y="152" font-weight="600">Chat</text>
+            <text x="80" y="170">React 19 + Vite</text>
+            <text x="80" y="188" style="fill: var(--muted)">Vercel</text>
+            <text x="335" y="114" font-weight="600">API Quarkus</text>
+            <text x="335" y="132">LangChain4j · imagem nativa</text>
+            <text x="335" y="148" style="fill: var(--muted)">Railway</text>
+            <text x="335" y="182">funil de estágios →</text>
+            <text x="335" y="199">ferramentas liberadas</text>
+            <text x="610" y="48" font-weight="600">LLM via OpenRouter</text>
+            <text x="610" y="66">modelo + fallback</text>
+            <text x="610" y="258" font-weight="600">PostgreSQL</text>
+            <text x="610" y="276">planos, preços, leads,</text>
+            <text x="610" y="292">memória da conversa</text>
+            <text x="80" y="284" font-weight="600">Corretor humano</text>
+            <text x="80" y="302">WhatsApp</text>
+          </g>
+          <g fill="currentColor" font-size="11.5" style="fill: var(--muted)">
+            <text x="408" y="64">1. mensagem + tools</text>
+            <text x="470" y="128">2. pede getPlanPrice</text>
+            <text x="482" y="214">3. consulta real</text>
+            <text x="160" y="258">handoff</text>
+          </g>
+        </svg>
+        <figcaption>O modelo nunca fala com o banco: ele pede uma ferramenta, a API executa a consulta e devolve o resultado para ele compor a resposta.</figcaption>
+      </figure>
+      <p>A cada mensagem, a API carrega o lead e o estágio atual do funil, monta o contexto com o que já foi coletado e chama o modelo oferecendo só as ferramentas permitidas naquele estágio. Quando o modelo decide, por exemplo, chamar <code>getPlanPrice</code>, o LangChain4j executa o método Java, que consulta o PostgreSQL, e devolve o resultado ao modelo. O frontend recebe texto e "cards" estruturados (plano, encaminhamento) e os renderiza como componentes, não como texto livre.</p>
+
+      <h2>Decisões e trade-offs</h2>
+
+      <section class="decision">
+        <h3>Preço e cobertura só via tool calling</h3>
+        <dl>
+          <dt>Decisão</dt><dd>O prompt proíbe o modelo de calcular preço; o valor exibido é sempre o retorno de uma ferramenta que consulta a tabela de preços por plano, acomodação e faixa etária. O card de cotação é montado pelo backend a partir desses dados.</dd>
+          <dt>Por quê</dt><dd>Em venda de plano de saúde, um preço ou uma cobertura inventada é um problema sério para a corretora. Os dados comerciais ficam num lugar só, editável no painel administrativo.</dd>
+          <dt>Custo</dt><dd>A correção passa a depender de o modelo realmente chamar a ferramenta. Ele às vezes não chama, o que levou às duas decisões seguintes.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Funil de estágios no banco, com ferramentas liberadas por estágio</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Cada conversa tem um estágio persistido (nome → nascimento → CPF/CNPJ → telefone → composição familiar → cotação → encaminhamento). O bot não escolhe o próprio objetivo: o backend lê o estágio, injeta a instrução do turno e expõe só as ferramentas daquele passo. Cada ferramenta de salvamento já avança o estágio antes de retornar.</dd>
+          <dt>Por quê</dt><dd>Transforma uma conversa aberta numa máquina de estados verificável: em cada turno o modelo só consegue salvar o dado que aquele estágio espera, e o progresso da venda fica registrado no banco, não na memória do modelo.</dd>
+          <dt>Custo</dt><dd>Menos flexibilidade na conversa, e um estágio novo exige mexer no enum do funil, no registro de ferramentas, no contexto do turno e no serviço do lead.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Rede de segurança para quando o modelo "esquece" a ferramenta</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Depois de cada resposta, uma heurística verifica se a mensagem do usuário parecia conter o dado esperado (uma data, um nome, um CPF) e se o estágio de fato avançou. Se não avançou, a API dispara um turno de correção. Se mesmo assim o card de cotação ou de encaminhamento não vier, o backend o gera a partir do banco.</dd>
+          <dt>Por quê</dt><dd>O modelo às vezes confirma o dado em texto ("ótimo, anotei sua data") sem chamar a ferramenta, e o dado nunca é salvo. A heurística é feita com regex, sem biblioteca de NER, porque as opções em português não se dão bem com imagem nativa.</dd>
+          <dt>Custo</dt><dd>Um turno extra de LLM quando a correção dispara, e uma heurística que precisa de manutenção quando surge um padrão novo de resposta.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Migração de Spring Boot para Quarkus com imagem nativa</h3>
+        <dl>
+          <dt>Decisão</dt><dd>A primeira versão foi em Spring Boot 3 com Spring AI e Spring Security com JWT próprio. Ela foi portada para Quarkus com LangChain4j, Hibernate Panache e SmallRye JWT com chaves RSA, e hoje roda como imagem nativa compilada com Mandrel.</dd>
+          <dt>Como</dt><dd>Os dois módulos ficaram lado a lado no repositório com a mesma estrutura de pacotes (<code>chat</code>, <code>plan</code>, <code>lead</code>, <code>config</code>, <code>security</code>), o que permitiu comparar o comportamento camada por camada durante a migração.</dd>
+          <dt>Custo</dt><dd>O build nativo cobrou caro, e cada problema ficou documentado:
+            <ul>
+              <li>bindings JNI do Netty/OpenSSL que precisaram ser inicializados em runtime, sem arrastar junto classes puramente Java do mesmo pacote;</li>
+              <li>um filtro de CORS que lia configuração na fase de inicialização estática e derrubava o container no boot, resolvido lendo a configuração sob demanda;</li>
+              <li>DTOs que o Jackson não conseguia serializar no binário nativo porque os endpoints declaravam o tipo genérico <code>Response</code>, resolvido declarando o tipo concreto.</li>
+            </ul>
+            O primeiro deploy ainda revelou uma cadeia de sete problemas de configuração mascarados um pelo outro.</dd>
+        </dl>
+      </section>
+
+      <section class="decision">
+        <h3>Deploy dividido e modelo com fallback</h3>
+        <dl>
+          <dt>Decisão</dt><dd>Frontend estático na Vercel, API e banco no Railway, migrações com Flyway. O GitHub Actions roda os testes do backend e o lint e o build do frontend nos pushes para a branch de desenvolvimento e nos pull requests para a principal. O acesso ao LLM passa pelo OpenRouter, com um modelo principal e troca automática para um modelo de fallback se a API falhar.</dd>
+          <dt>Por quê</dt><dd>Separar front e API permite publicar cada um no ritmo dele. O fallback evita que uma instabilidade de um provedor derrube a venda no meio da conversa.</dd>
+          <dt>Custo</dt><dd>CORS e URLs por ambiente para manter em dois provedores. Os dois modelos precisam se comportar de forma parecida com o mesmo prompt e as mesmas ferramentas.</dd>
+        </dl>
+      </section>
+
+      <h2>Telas do painel</h2>
+      <p class="muted">Painel administrativo protegido por JWT, de onde a corretora mantém planos, faixas etárias, preços e promoções, a mesma base que o bot consulta. Capturas da demo local com dados fictícios.</p>
+      <div class="screens wide">
+        <figure class="figure">
+          <img src="/assets/img/assistente-vendas-ia/admin-precos.webp" alt="Tabela de preços no painel: plano, acomodação, faixa etária, preço base e vigência" width="1280" height="800" loading="lazy">
+          <figcaption>Tabela de preços por plano, acomodação e faixa etária: é daqui que vem o número que o bot mostra.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="/assets/img/assistente-vendas-ia/admin-leads.webp" alt="Lista de leads captados pelo chat com nome, contato e CPF mascarados, data de cadastro e origem" width="1280" height="800" loading="lazy">
+          <figcaption>Leads captados pelo chat, já qualificados para o corretor.</figcaption>
+        </figure>
+      </div>
+
+      <div class="closing">
+        <p><strong>O código é privado e o cliente não é identificado.</strong> Faço demonstração em entrevista, incluindo a comparação entre as versões Spring Boot e Quarkus.</p>
+        <p><a href="mailto:marcelosegundo999@gmail.com">marcelosegundo999@gmail.com</a> · <a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <ul>
+        <li><a href="mailto:marcelosegundo999@gmail.com">E-mail</a></li>
+        <li><a href="https://www.linkedin.com/in/marcelosegundo">LinkedIn</a></li>
+        <li><a href="https://github.com/MarceloSegundo">GitHub</a></li>
+        <li><a href="/curriculo/marcelo-segundo.pdf">Currículo</a></li>
+      </ul>
+    </div>
+  </footer>
+</body>
+</html>
