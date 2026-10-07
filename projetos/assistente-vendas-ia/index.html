@@ -51,7 +51,7 @@
           <source srcset="/assets/img/assistente-vendas-ia/chat-preco.webp" media="(prefers-reduced-motion: reduce)">
           <img src="/assets/img/assistente-vendas-ia/chat-conversa.webp" alt="Animação de uma conversa completa: o cliente pede uma cotação, informa nome, data de nascimento, CPF (mascarado) e telefone, diz que não tem dependentes, recebe o card do Plano Essencial com o preço e é encaminhado para um corretor no WhatsApp" width="560" height="905">
         </picture>
-        <figcaption>Uma conversa completa, do primeiro "oi" ao encaminhamento para o corretor. Demo local com marca, preços e dados fictícios.</figcaption>
+        <figcaption>Uma conversa completa, do primeiro "oi" ao encaminhamento para o corretor. Demo local: marca trocada por uma fictícia, preços e dados do cliente inventados.</figcaption>
       </figure>
 
       <h2>Arquitetura</h2>
@@ -147,7 +147,7 @@
               <li>um filtro de CORS que lia configuração na fase de inicialização estática e derrubava o container no boot, resolvido lendo a configuração sob demanda;</li>
               <li>DTOs que o Jackson não conseguia serializar no binário nativo porque os endpoints declaravam o tipo genérico <code>Response</code>, resolvido declarando o tipo concreto.</li>
             </ul>
-            O primeiro deploy ainda revelou uma cadeia de sete problemas de configuração mascarados um pelo outro.</dd>
+            Pôr a versão Quarkus no ar também revelou sete problemas independentes de deploy, vários mascarados um pelo outro.</dd>
         </dl>
       </section>
 
@@ -168,7 +168,7 @@
           <figcaption>Tabela de preços por plano, acomodação e faixa etária: é daqui que vem o número que o bot mostra.</figcaption>
         </figure>
         <figure class="figure">
-          <img src="/assets/img/assistente-vendas-ia/admin-leads.webp" alt="Lista de leads captados pelo chat com nome, contato e CPF mascarados, data de cadastro e origem" width="1280" height="800" loading="lazy">
+          <img src="/assets/img/assistente-vendas-ia/admin-leads.webp" alt="Lista de leads com um lead fictício (Ana Exemplo), contato e CPF mascarados, data de cadastro e origem chat" width="1280" height="800" loading="lazy">
           <figcaption>Leads captados pelo chat, já qualificados para o corretor.</figcaption>
         </figure>
       </div>
